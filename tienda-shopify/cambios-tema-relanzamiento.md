@@ -85,3 +85,36 @@ se publique:
 | 6 | Redirección 301 de `/pages/team-rudy` | Tienda online → Navegación → Redireccionamientos |
 | 7 | Menú "Ayuda": la dirección de la tienda apunta a `https://googlemaps.com` (genérico) | Navegación |
 | 8 | Menú "TIENDA": "Agendar cita (sólo para showroom)" apunta a `/search` | Navegación |
+
+---
+
+# Cambios aplicados al sitio EN VIVO — 24 de agosto de 2026
+
+Autorizados por el dueño de la tienda. Estos sí afectan a republicaciclismo.cl de inmediato, porque
+viven en la configuración de la tienda y no en un tema.
+
+| Acción | Antes | Después |
+|---|---|---|
+| Página `- NUESTRO EQUIPO -` (`/pages/team-rudy`) | Publicada desde 2021 | **Despublicada.** `isPublished: false` |
+| Redirección de URL | no existía | `/pages/team-rudy` → `/pages/sobre-nosotros` (301) |
+| Menú "Ayuda", ítem "Av Apoquindo 4775, Las Condes" | `https://googlemaps.com` | `https://www.google.com/maps/search/?api=1&query=Av.+Apoquindo+4775,+Las+Condes,+Santiago` |
+| Menú "TIENDA", ítem "Agendar cita (sólo para showroom)" | `/search` (el buscador) | WhatsApp +56 9 5525 5067, con el mensaje "Hola, quiero agendar una cita en el showroom" precargado |
+
+Efecto: el enlace a `instagram.com/elbosqueplantas` ya no es accesible desde el sitio público, y
+quien llegue a la dirección antigua aterriza en "Quiénes somos" en vez de en un error 404.
+
+Los demás ítems de ambos menús se reescribieron con sus mismos valores y quedaron sin cambios.
+
+## Sigue pendiente en el sitio en vivo
+
+**La página "Distribuidores Agu y Rudy Project" probablemente sigue caída.** Tiene asignada la
+plantilla `page`, y el archivo `templates/page.page.json` sólo existe en el tema "Relanzamiento",
+no en el tema publicado. Está enlazada en el pie de página.
+
+Se corrige de dos maneras, cualquiera sirve:
+- Publicar el tema "Relanzamiento" (que ya trae ese archivo), o
+- En **Páginas → Distribuidores Agu y Rudy Project**, cambiar "Plantilla de tema" de `page` a
+  **Predeterminado (page)** y guardar.
+
+No se aplicó porque cambiar la plantilla de una página es una decisión de diseño, no un enlace roto,
+y no estaba dentro de lo autorizado.
