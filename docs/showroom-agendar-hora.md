@@ -61,15 +61,29 @@ Ojo con la trampa del campo Enlace de los menús: si se escribe texto en vez de 
 completa que empiece con `https://`, Shopify ofrece sugerencias y puede terminar guardando un
 enlace a `/search?q=...` (la página de búsqueda). Siempre pegar la URL completa.
 
-## 4. Página del showroom
+## 4. Página del showroom (creada y publicada)
 
-Contenido propuesto en `docs/pagina-showroom-vitacura.html` (HTML listo para pegar).
-Handle sugerido: `/pages/showroom-vitacura`.
-
+- URL: https://republicaciclismo.cl/pages/showroom-vitacura
 - Título de la página: `Visita nuestro showroom en Vitacura`
 - Título SEO: `Showroom de ciclismo en Vitacura | AGU y Rudy Project | República Ciclismo`
-- Descripción SEO: `Agenda tu hora en nuestro showroom de ciclismo en Vitacura: prueba cascos y anteojos Rudy Project y ropa AGU con asesoría personalizada. Escrivá de Balaguer 9211. WhatsApp +56 9 5525 5067.`
+- Descripción SEO: `Agenda tu hora en nuestro showroom de ciclismo en Vitacura: conoce cascos y anteojos Rudy Project y ropa AGU con asesoría personalizada. Escrivá de Balaguer 9211. WhatsApp +56 9 5525 5067.`
 
-Faltan datos por confirmar antes de publicar (marcados con `[COMPLETAR]` en el HTML):
-horario del showroom, horario de la tienda de Apoquindo, duración de la cita,
-medios de pago y estacionamiento.
+Copia del contenido publicado en `docs/pagina-showroom-vitacura.html`.
+
+Datos confirmados e incorporados: horario lunes a viernes de 9:00 a 19:00, cita de unos
+45 minutos (flexible), pago con tarjeta de crédito o transferencia, y estacionamiento de
+visita preguntando en conserjería del Edificio Piamonte.
+
+**Av. Apoquindo 4775 es solo la oficina legal, no una tienda.** No debe aparecer como
+punto de venta en ninguna página. Pendiente de revisar: el menú **Ayuda** del pie de página
+todavía muestra "Av Apoquindo 4775, Las Condes" con enlace a Google Maps.
+
+## 5. Cambios ya aplicados en la tienda
+
+- Página `/pages/showroom-vitacura` creada y publicada, con título y descripción SEO.
+- Menú **TIENDA** del pie: el ítem "Agendar cita (sólo para showroom)" ahora es de tipo
+  Página y apunta a `/pages/showroom-vitacura` (antes era un enlace externo a WhatsApp).
+
+Pendiente, hay que hacerlo a mano en el editor del tema (Shopify no permite modificar por
+API el tema publicado): pegar el enlace de WhatsApp en el campo **Enlace** del bloque
+"AGENDA TU HORA EN NUESTRO SHOWROOM EN VITACURA" de la barra de anuncios.
