@@ -83,3 +83,41 @@ a Loox ni a Judge.me desde aquí).
 - Orden de la página: el bloque de reseñas sigue al final, después de "Vistos recientemente".
 - Sección vacía de Loox: sigue en la plantilla (se saca cuando Loox se desinstale).
 - El tema publicado sigue con el duplicado y con los ajustes viejos.
+
+---
+
+## Tercer cambio: orden de la página (punto 4, aprobado)
+
+La sección de reseñas de Judge.me (`17797154411e6840df`) se movió desde el final de la
+plantilla hasta justo debajo del bloque de producto.
+
+`order` antes:
+
+```
+main, sub, background-image-text, product-recommendations, featured_collection_HAcJnj,
+recently-viewed, collection-return, loox-product-reviews-app-section, 17797154411e6840df
+```
+
+`order` ahora:
+
+```
+main, sub, 17797154411e6840df, background-image-text, product-recommendations,
+featured_collection_HAcJnj, recently-viewed, collection-return, loox-product-reviews-app-section
+```
+
+Se dejó por delante de `background-image-text` (hoy desactivada) para que las reseñas queden
+inmediatamente después del producto aunque más adelante se active esa sección de marca.
+
+### Verificación (vista previa, `casco-triatlon-wingdream-white-matte`)
+
+Orden real de secciones renderizadas en la página:
+
+1. `main` (producto)
+2. `17797154411e6840df` (reseñas Judge.me)
+3. `product-recommendations` ("También te puede interesar")
+4. `recently-viewed`
+5. `collection-return`
+6. `loox-product-reviews-app-section` (vacía, no muestra nada)
+
+Widget con `data-shop-reviews="true"`, 17 reseñas de tienda disponibles, datos reales
+(`number_of_reviews: 1`). Bloque de cuotas Mercado Pago intacto.
