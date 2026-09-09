@@ -1,0 +1,157 @@
+{%- form 'product', product, id: form_id, class: 'product-single__form' -%}
+
+  {%- liquid
+    assign gift_card_recipient_feature_active = false
+    if block.settings.show_gift_card_recipient and product.gift_card?
+      assign gift_card_recipient_feature_active = true
+    endif
+
+    assign enable_dynamic_buttons = false
+    if show_dynamic_checkout and template != 'product.preorder' and gift_card_recipient_feature_active == false
+      assign enable_dynamic_buttons = true
+    endif
+  -%}
+
+  {%- if gift_card_recipient_feature_active -%}
+    {%- render 'gift-card-recipient-form', product: product, form: form, section: section -%}
+  {%- endif -%}
+
+  {%- if enable_dynamic_buttons -%}
+    <div class="payment-buttons">
+  {%- endif -%}
+
+    {%- liquid
+      assign default_text = 'products.product.add_to_cart' | t
+      assign button_text = 'products.product.add_to_cart' | t
+      if template contains 'preorder'
+        assign default_text = 'products.product.preorder' | t
+        assign button_text = 'products.product.preorder' | t
+      endif
+      unless current_variant.available
+        assign button_text = 'products.product.sold_out' | t
+      endunless
+    -%}
+
+    <button
+      {% if product.empty? %}type="button"{% else %}type="submit"{% endif %}
+      name="add"
+      data-add-to-cart
+      class="btn btn--full add-to-cart{% if enable_dynamic_buttons and product.selling_plan_groups == empty %} btn--secondary{% endif %}"
+      {% unless current_variant.available %} disabled="disabled"{% endunless %}>
+      <span data-add-to-cart-text data-default-text="{{ default_text }}">
+        {{ button_text }}
+      </span>
+    </button>
+
+    {%- if enable_dynamic_buttons -%}
+      {{ form | payment_button }}
+    {%- endif -%}
+<div id="__ventipay_product_installments_block" style="margin-top:16px"></div>
+<script type="text/javascript">
+// VentiPay Widget
+// Setup
+var __ventipay_color = 'primary'; // Background color of the button. One of: primary, white, black, or an HEX color code
+var __ventipay_text_color = 'white'; // Text color of the button. One of: primary, white, black, or an HEX color code
+var __ventipay_language = 'es'; // One of: es, en
+var __ventipay_message_type = 'INTEREST_FREE_DEBIT_CREDIT_VISIBLE_INSTALLMENT_AMOUNT';
+// DO NOT CHANGE ANYTHING BELOW THIS LINE
+var __ventipay_money_format = {{ shop.money_format | json }};
+{%- comment -%}
+  República Ciclismo: VentiPay instala esto con `product.price_min`, que es el
+  precio MÁS BAJO del producto. En un producto con variantes de distinto precio
+  eso mostraba cuotas que no correspondían al precio en pantalla (ej.: casco
+  Venger a $149.990 anunciando cuotas sobre $99.990). Usamos la variante
+  seleccionada.
+{%- endcomment -%}
+var __ventipay_price_min = {{ product.selected_or_first_available_variant.price | json }};
+var __ventipay_cart_currency = {{ cart.currency.iso_code | json }};
+var __ventipay_customer = {{ customer | json }};
+var __ventipay_cart = {{ cart | json }};
+</script>
+<script type="text/javascript" src="https://js.ventipay.com/widgets/shopify/product/"></script>
+{%- capture rc_vp_precios -%}{ {%- for v in product.variants -%}"{{ v.id }}":{{ v.price }}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%} }{%- endcapture -%}
+<script type="text/javascript">
+/* República Ciclismo — sincroniza el monto de la cuota de VentiPay con la
+   variante elegida. Su widget se dibuja una sola vez al cargar y no se
+   entera de los cambios de color/talla; esto reescribe sólo el monto.
+   Si su markup cambia, no tocamos nada y queda el texto original. */
+(function(){
+  var CUOTAS = 3, MIN = 1000, MAX = 300000; /* límites de VentiPay para CLP */
+  var precios = {};
+  try { precios = JSON.parse('{{ rc_vp_precios }}'); } catch (e) { return; }
+
+  function moneda(n){
+    try {
+      return new Intl.NumberFormat('es-CL', {style:'currency', currency:'CLP'}).format(n);
+    } catch (e) {
+      return '$' + n.toLocaleString('es-CL');
+    }
+  }
+
+  function arrancar(){
+    var bloque = document.getElementById('__ventipay_product_installments_block');
+    if (!bloque || !bloque.innerHTML.trim()) return;   /* VentiPay no mostró nada: no inventamos */
+    if (bloque.querySelectorAll('span strong').length < 2) return; /* mensaje sin monto */
+
+    var plantilla = bloque.innerHTML;
+    var display   = bloque.style.display || 'flex';
+    var scope     = bloque.closest('.product-section') || document;
+
+    function actualizar(){
+      var input = scope.querySelector('[name="id"]');
+      if (!input || precios[input.value] == null) return; /* variante desconocida: dejamos lo que hay */
+
+      var clp = Math.round(precios[input.value] / 100);
+      if (clp < MIN || clp > MAX) { bloque.style.display = 'none'; return; }
+
+      bloque.style.display = display;
+      bloque.innerHTML = plantilla;
+      var fuertes = bloque.querySelectorAll('span strong');
+      if (fuertes.length >= 2) {
+        fuertes[1].textContent = moneda(Math.floor(clp / CUOTAS));
+      }
+    }
+
+    actualizar();
+
+    var precioEl = scope.querySelector('[data-product-price]');
+    if (precioEl && window.MutationObserver) {
+      new MutationObserver(actualizar).observe(precioEl, {
+        childList: true, characterData: true, subtree: true
+      });
+    }
+    var form = scope.querySelector('form[action*="/cart/add"]') || scope;
+    if (form.addEventListener) {
+      form.addEventListener('change', function(){ setTimeout(actualizar, 0); });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', arrancar);
+  } else {
+    arrancar();
+  }
+})();
+</script>
+  {%- if enable_dynamic_buttons -%}
+    </div>
+  {%- endif -%}
+
+  <div class="shopify-payment-terms product__policies">{{ form | payment_terms }}</div>
+
+  <select name="id" data-product-select class="product-single__variants no-js">
+    {%- for variant in product.variants -%}
+      {%- if variant.available -%}
+        <option {% if variant == product.selected_or_first_available_variant %}
+          selected="selected"{% endif %}
+          value="{{ variant.id }}">
+          {{ variant.title }} - {{ variant.price | money_with_currency }}
+        </option>
+      {%- else -%}
+        <option disabled="disabled">
+          {{ variant.title }} - {{ 'products.product.sold_out' | t }}
+        </option>
+      {%- endif -%}
+    {%- endfor -%}
+  </select>
+{%- endform -%}

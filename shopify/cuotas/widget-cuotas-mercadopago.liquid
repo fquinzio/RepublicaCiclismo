@@ -2,6 +2,8 @@
   República Ciclismo — Cuotas Mercado Pago
   3 cuotas sin interés, sólo desde $50.000.
   Calcula sobre la VARIANTE seleccionada y se actualiza al cambiar color/talla.
+  El monto se redondea hacia abajo, igual que el widget de VentiPay, para que
+  ambos recuadros muestren la misma cifra en la misma página.
 {%- endcomment -%}
 {%- liquid
   assign rc_variant = product.selected_or_first_available_variant
@@ -112,7 +114,7 @@
       /* Bajo el mínimo la promo no aplica: no mostramos nada. */
       if (!clp || clp < MINIMO) { box.hidden = true; return; }
 
-      var cuota = Math.ceil(clp / CUOTAS);
+      var cuota = Math.floor(clp / CUOTAS);
       salida.innerHTML =
         '<span class="rc-cuotas__main">' + CUOTAS + ' x <strong>$' +
         cuota.toLocaleString('es-CL') + '</strong></span>' +
