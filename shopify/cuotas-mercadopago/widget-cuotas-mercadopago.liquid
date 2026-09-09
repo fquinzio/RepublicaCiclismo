@@ -1,0 +1,149 @@
+{%- comment -%}
+  República Ciclismo — Cuotas Mercado Pago
+  3 cuotas sin interés, sólo desde $50.000.
+  Calcula sobre la VARIANTE seleccionada y se actualiza al cambiar color/talla.
+{%- endcomment -%}
+{%- liquid
+  assign rc_variant = product.selected_or_first_available_variant
+-%}
+{%- capture rc_precios -%}{ {%- for v in product.variants -%}"{{ v.id }}":{{ v.price }}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%} }{%- endcapture -%}
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  .rc-cuotas{
+    position:relative;
+    border:1px solid #ccc;
+    border-radius:14px;
+    padding:28px 16px 16px;
+    max-width:400px;
+    margin:30px auto;
+    font-family:'Montserrat',sans-serif;
+    background:#fff;
+  }
+  .rc-cuotas__header{
+    position:absolute;
+    top:0;
+    left:16px;
+    transform:translateY(-50%);
+    background:#fff;
+    padding:0 8px;
+    font-size:14px;
+    font-weight:500;
+    color:#333;
+    white-space:nowrap;
+  }
+  .rc-cuotas__result{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .rc-cuotas__logo{
+    height:28px;
+    width:auto;
+    flex-shrink:0;
+  }
+  .rc-cuotas__text{
+    flex-grow:1;
+    display:flex;
+    flex-wrap:nowrap;
+    justify-content:center;
+    align-items:baseline;
+    gap:.5em;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .rc-cuotas__main{font-size:16px;}
+  .rc-cuotas__main strong{font-weight:600;}
+  .rc-cuotas__note{font-size:14px;color:#666;white-space:nowrap;}
+  @media(max-width:420px){
+    .rc-cuotas__main{font-size:14px;}
+    .rc-cuotas__note{font-size:12px;}
+  }
+</style>
+
+<div class="rc-cuotas"
+     hidden
+     data-rc-cuotas="3"
+     data-rc-minimo="50000"
+     data-rc-precio-inicial="{{ rc_variant.price }}"
+     data-rc-precios='{{ rc_precios }}'>
+  <div class="rc-cuotas__header">Pago en cuotas</div>
+  <div class="rc-cuotas__result">
+    <img class="rc-cuotas__logo"
+         src="https://cdn.shopify.com/s/files/1/0848/4457/7086/files/mercado-pago-logo_11zon.webp?v=1724300997"
+         alt="Logo Mercado Pago" loading="lazy">
+    <div class="rc-cuotas__text" data-rc-texto></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  function iniciar(box){
+    if (box.dataset.rcListo) return;
+    box.dataset.rcListo = '1';
+
+    var CUOTAS = parseInt(box.dataset.rcCuotas, 10) || 3;
+    var MINIMO = parseInt(box.dataset.rcMinimo, 10) || 0;
+    var salida = box.querySelector('[data-rc-texto]');
+    var scope  = box.closest('.product-section') || document;
+
+    var precios = {};
+    try { precios = JSON.parse(box.dataset.rcPrecios || '{}'); } catch (e) {}
+
+    /* Centavos de la variante que el cliente está viendo ahora mismo.
+       1) id de variante del formulario  2) precio pintado por el tema  3) variante inicial */
+    function centavosActuales(){
+      var input = scope.querySelector('[name="id"]');
+      if (input && precios[input.value] != null) return precios[input.value];
+
+      var el = scope.querySelector('[data-product-price]');
+      if (el) {
+        var digitos = el.textContent.replace(/[^\d]/g, '');
+        if (digitos) return parseInt(digitos, 10) * 100;
+      }
+
+      return parseInt(box.dataset.rcPrecioInicial, 10);
+    }
+
+    function pintar(){
+      var clp = Math.round(centavosActuales() / 100);
+
+      /* Bajo el mínimo la promo no aplica: no mostramos nada. */
+      if (!clp || clp < MINIMO) { box.hidden = true; return; }
+
+      var cuota = Math.ceil(clp / CUOTAS);
+      salida.innerHTML =
+        '<span class="rc-cuotas__main">' + CUOTAS + ' x <strong>$' +
+        cuota.toLocaleString('es-CL') + '</strong></span>' +
+        '<small class="rc-cuotas__note">(sin interés)</small>';
+      box.hidden = false;
+    }
+
+    pintar();
+
+    var precioEl = scope.querySelector('[data-product-price]');
+    if (precioEl && window.MutationObserver) {
+      new MutationObserver(pintar).observe(precioEl, {
+        childList: true, characterData: true, subtree: true
+      });
+    }
+
+    var form = scope.querySelector('form[action*="/cart/add"]') || scope;
+    if (form.addEventListener) {
+      form.addEventListener('change', function(){ setTimeout(pintar, 0); });
+    }
+  }
+
+  function revisar(){
+    var cajas = document.querySelectorAll('.rc-cuotas');
+    for (var i = 0; i < cajas.length; i++) iniciar(cajas[i]);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', revisar);
+  } else {
+    revisar();
+  }
+})();
+</script>
